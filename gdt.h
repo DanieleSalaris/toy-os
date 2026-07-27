@@ -1,6 +1,7 @@
 #ifndef GDT_H
 #define GDT_H
 #include <stdint.h>
+#define GDT_KERNEL_CODE_REF 0x08
 
 typedef struct {
     uint16_t limit_low;

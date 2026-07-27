@@ -40,7 +40,7 @@ gdt_flush:
     mov ss, ax
     ; initing cs to the code section with a far jump
     jmp 0x08:.flush_far_jump
-.flush_far_jump
+.flush_far_jump:
     ; restoring base pointer
     pop ebp
     ret

@@ -2,7 +2,7 @@ AS = nasm
 CC = x86_64-elf-gcc
 LD = x86_64-elf-ld
 
-CFLAGS = -ffreestanding -m32 -O2 -Wall -Wextra -c
+CFLAGS = -ffreestanding -m32 -O2 -Wall -Wextra -c -g
 ASFLAGS = -f elf32
 LDFLAGS = -m elf_i386 -T linker.ld
 
@@ -10,21 +10,20 @@ KERNEL = kernel.elf
 ISO = toy-os.iso
 GRUB_MKRESCUE = i686-elf-grub-mkrescue 
 
-SRCS = kernel.c gdt.c
-COBJS = kernel.o gdt.o
-OBJS = boot.o $(COBJS) 
+COBJS = kernel.o gdt.o idt.o vga.o
+OBJS = boot.o isr.o $(COBJS) 
 
 # Default target
 all: $(KERNEL)
 
 # Assemble boot code
 
-boot.o: boot.asm
-	$(AS) $(ASFLAGS) boot.asm -o boot.o
+%.o: %.asm
+	$(AS) $(ASFLAGS) $< -o $@
 
 # Compile kernel
 
-%.o: %c
+%.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
 
 compile: $(COBJS)
@@ -43,6 +42,8 @@ iso: $(KERNEL)
 # Run in QEMU
 run: iso
 	qemu-system-i386 -cdrom $(ISO) -boot d
+dbg: iso
+	qemu-system-i386 -cdrom $(ISO) -boot d -S -s
 
 # Clean build files
 clean:
