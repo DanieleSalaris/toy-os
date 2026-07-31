@@ -4,11 +4,13 @@
 #include "idt.h"
 #include "vga.h"
 
+extern void pic_remap(void);
 
 void kernel_main() {
     const char* msg = "Hello from my OS!";
     gdt_init();
     idt_init();
+    pic_remap();
 
     terminal_printstring(msg);
 

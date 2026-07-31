@@ -1,6 +1,7 @@
 *.o
 *.iso
 *.elf
+*.swp
 build
 iso
 .DS_Store
