@@ -3,5 +3,6 @@
 
 void terminal_putchar(char c);
 void terminal_printstring(const char *s);
+void terminal_put_hex(int num);
 
 #endif

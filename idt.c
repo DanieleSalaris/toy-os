@@ -40,10 +40,6 @@ void idt_division_by_zero_handler() {
     kernel_panic("Division by zero");        
 }
 
-void idt_keyboard_input_handler(uint8_t scancode) {
-
-}
-
 idt_entry_t idt_format_entry(uint32_t offset, uint16_t segment_selector, uint8_t flags) {
     idt_entry_t e;
     e.offset_low = (uint16_t) offset;

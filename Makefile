@@ -6,6 +6,7 @@ OUTDIR = build
 CFLAGS = -ffreestanding -m32 -O2 -Wall -Wextra -c -g
 ASFLAGS = -f elf32
 LDFLAGS = -m elf_i386 -T linker.ld
+QEMUFLAGS = -display cocoa,zoom-to-fit=on
 
 KERNEL = $(OUTDIR)/kernel.elf
 ISO = $(OUTDIR)/toy-os.iso
@@ -54,9 +55,9 @@ iso: $(KERNEL)
 
 # Run in QEMU
 run: iso
-	qemu-system-i386 -cdrom $(ISO) -boot d
+	qemu-system-i386 -cdrom $(ISO) -boot d $(QEMUFLAGS)
 dbg: iso
-	qemu-system-i386 -cdrom $(ISO) -boot d -S -s
+	qemu-system-i386 -cdrom $(ISO) -boot d -S -s $(QEMUFLAGS)
 
 # Clean build files
 clean:
