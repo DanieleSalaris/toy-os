@@ -3,6 +3,10 @@
 
 void terminal_putchar(char c);
 void terminal_printstring(const char *s);
-void terminal_put_hex(int num);
+void terminal_puthex(int num);
+void terminal_putint(int num);
+
+// debugging functions 
+void fill_screen();
 
 #endif
