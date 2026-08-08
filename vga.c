@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "string.h"
 #include "vga.h"
+#include "asm.h"
 
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
@@ -14,8 +15,13 @@ char hex_mapper[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', '
 
 volatile uint16_t* vga = (volatile uint16_t*) 0XB8000;
 
-size_t vga_row = 0;
-size_t vga_col = 0;
+typedef struct {
+    uint16_t row;
+    uint16_t col;
+    uint16_t pos;
+} vga_pos_t;
+
+vga_pos_t vga_pos = { 0, 0, 0 };
 
 struct vga_cell {
     uint8_t c;
@@ -29,6 +35,33 @@ void fill_screen() {
     }
 }
 
+// Set position value to hardware registers
+// port 0x3D4 point to the register 0x0E contains high value while 0x0F contains low value
+// poer 0x3D5 set the selected register value
+void terminal_set_cursor_position(uint16_t position) {
+    asm_out(0x3D4, 0x0E);
+    asm_out(0x3D5, (uint8_t)(position>>8));
+    asm_out(0x3D4, 0x0F);
+    asm_out(0x3D5, (uint8_t) position);
+}
+
+void set_vga_pos(uint16_t row, uint16_t col) {
+    vga_pos.row = row;
+    vga_pos.col = col;
+    vga_pos.pos = row * VGA_WIDTH + col;
+    terminal_set_cursor_position(vga_pos.pos);
+}
+
+void inc_vga_pos() {
+    vga_pos.col++;
+    if (vga_pos.col < VGA_WIDTH) {
+        vga_pos.pos++;
+        terminal_set_cursor_position(vga_pos.pos);
+        return;
+    }
+    terminal_breakline();
+}
+
 void terminal_scrolldown() {
     memmove((void*) vga, (void*) (vga+VGA_WIDTH), sizeof(*vga) * (VGA_HEIGHT-1) * VGA_WIDTH);
     size_t position = (VGA_HEIGHT-1) * VGA_WIDTH;
@@ -37,6 +70,14 @@ void terminal_scrolldown() {
     }
 }
 
+void terminal_breakline() {
+    uint16_t row = vga_pos.row + 1;
+    if (row >= VGA_HEIGHT) {
+        row --;
+        terminal_scrolldown();
+    }
+    set_vga_pos(row, 0);
+}
 
 void terminal_putint(int num) {
     char intbuf[INT_BUF_SIZE];
@@ -71,14 +112,10 @@ void terminal_putchar(char c) {
         terminal_breakline();
         return;
     }
-    struct vga_cell *position = (struct vga_cell*) (vga + (vga_col + vga_row * VGA_WIDTH));
+    struct vga_cell *position = (struct vga_cell*) (vga + vga_pos.pos);
     position->c = (uint8_t) c;
     position->color = VGA_CHAR_COLOR;
-    vga_col++;
-    if (vga_col < VGA_WIDTH) {
-        return;
-    }
-    terminal_breakline();
+    inc_vga_pos();
 }
 
 void terminal_printstring(const char *s) {
@@ -88,11 +125,3 @@ void terminal_printstring(const char *s) {
     }
 }
 
-void terminal_breakline() {
-    vga_col = 0;
-    vga_row++;
-    if (vga_row >= VGA_HEIGHT) {
-        vga_row--;
-        terminal_scrolldown();
-    }
-}

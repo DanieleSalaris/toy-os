@@ -18,16 +18,16 @@ uint8_t uppercase_on = 0;
 
 void keyboard_handle_special_chars(uint8_t scancode) {
     switch (scancode) {
-        case 0x1C:
+        case 0x1C: // enter
             terminal_breakline();
             break;
-        case 0x3A:
+        case 0x3A: // lock click
             uppercase_on ^= UO_LOCK_BIT;
             break;
-        case 0x2A:
+        case 0x2A: // shift pressed
             uppercase_on |= UO_SHIFT_BIT;
             break;
-        case 0xAA:
+        case 0xAA: // shift unpressed
             uppercase_on &= ~UO_SHIFT_BIT;
             break;
     }

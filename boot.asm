@@ -20,6 +20,8 @@ stack_top:
 section .text
 global _start:function (_start.end - _start)
 global pic_remap
+global asm_out
+global asm_in
 global gdt_flush:function (gdt_flush_end - gdt_flush)
 extern kernel_main                        ; Declare external C function
 
@@ -66,7 +68,16 @@ pic_remap:
     out 0xA1, al        ; Masking All IRQ lines for slave
     out 0x80, al
     ret
-
+asm_out:
+    mov eax, [esp+8]    ; value
+    mov edx, [esp+4]    ; port
+    out dx, al
+    ret
+asm_in:
+    mov edx, [esp+4]    ;port
+    in al, dx
+    movzx eax, al
+    ret
 gdt_flush:
     ; init base pointer
     push ebp
