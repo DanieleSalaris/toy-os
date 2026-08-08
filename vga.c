@@ -67,6 +67,10 @@ void terminal_puthex(int num) {
 }
 
 void terminal_putchar(char c) {
+    if (c == '\n') {
+        terminal_breakline();
+        return;
+    }
     struct vga_cell *position = (struct vga_cell*) (vga + (vga_col + vga_row * VGA_WIDTH));
     position->c = (uint8_t) c;
     position->color = VGA_CHAR_COLOR;
@@ -74,17 +78,21 @@ void terminal_putchar(char c) {
     if (vga_col < VGA_WIDTH) {
         return;
     }
-    vga_col = 0;
-    vga_row++;
-    if (vga_row >= VGA_HEIGHT) {
-        vga_row--;
-        terminal_scrolldown();
-    }
+    terminal_breakline();
 }
 
 void terminal_printstring(const char *s) {
     while (*s != '\0') {
         terminal_putchar(*s);
         s++;
+    }
+}
+
+void terminal_breakline() {
+    vga_col = 0;
+    vga_row++;
+    if (vga_row >= VGA_HEIGHT) {
+        vga_row--;
+        terminal_scrolldown();
     }
 }
