@@ -30,3 +30,7 @@ void *memmove(void *dest, const void *src, size_t n) {
     return memcpy_desc(dest, src, n);
 }
 
+void *memcpy(void *dest, const void *src, size_t n) {
+    return memcpy_asc(dest, src, n);
+}
+
